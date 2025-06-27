@@ -1,0 +1,27 @@
+{% extends "auctions/layout.html" %}
+
+{% block title %} Catagory: {{ category.name }} {% endblock %}
+
+{% block body %}
+
+<h2 class="mt-5">Catagory: {{ category.name }}</h2>
+
+<ul class="list-group mb-5">
+    {% for item in category.items.all %}
+
+        <li class="list-group-item d-flex justify-content-between align-items-center"> 
+            <a href="{% url 'item' item.id %}" class="text-secondary font-weight-bold"> 
+                {{ item }} 
+            </a> 
+            
+        </li>
+
+        {% empty %}
+        <li class="list-group-item text-muted">No items in your watchlist</li>
+
+    {% endfor %}
+</ul>
+
+
+
+{% endblock %}

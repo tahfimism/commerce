@@ -1,0 +1,52 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+<h2 class="mb-4">Active Listings</h2>
+
+<div class="row">
+    {% for item in items %}
+    <div class="col-md-4 col-lg-3 mb-4">
+        <div class="card h-100 shadow-sm">
+            <img src="{{ item.image }}" class="card-img-top" style="object-fit:cover; height:200px;" alt="Listing image">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">
+                    <a href="{% url 'item' item.id %}" class="text-decoration-none text-primary">{{ item.title }}</a>
+                </h5>
+                <p class="card-text text-muted mb-2" style="min-height:48px;">{{ item.description }}</p>
+                <p class="card-price mb-2">
+                    <strong>Price: $</strong>
+                    {% if item.bids.all|length > 0 %}
+                        {% with max_bid=item.bids.all|dictsortreversed:"amount"|first %}
+                            {{ max_bid.amount }}
+                        {% endwith %}
+                    {% else %}
+                        {{ item.starting_bid }}
+                    {% endif %}
+                </p>
+                <span class="badge badge-info mb-2">{{ item.category }}</span>
+                <span class="badge badge-success mb-2">Active</span>
+                <div class="mt-auto">
+                    <a href="{% url 'item' item.id %}" class="btn btn-outline-primary btn-sm w-100">View Listing</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-info">No active listings found.</div>
+    </div>
+    {% endfor %}
+</div>
+
+<h3 class="mt-5">Closed Listings</h3>
+<ul class="list-group mb-5">
+    {% for item in closed_items %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            <a href="{% url 'item' item.id %}" class="text-secondary font-weight-bold">{{ item }}</a>
+            <span class="badge badge-secondary">Closed</span>
+        </li>
+    {% empty %}
+        <li class="list-group-item text-muted">No closed listings.</li>
+    {% endfor %}
+</ul>
+{% endblock %}

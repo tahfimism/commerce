@@ -1,0 +1,116 @@
+{% extends "auctions/layout.html" %}
+
+{% block title %} {{ item.title }} {% endblock %}
+
+{% block body %}
+
+<div class="container my-4">
+
+    <div class="card shadow-sm mb-4">
+        <div class="row no-gutters">
+            <div class="col-md-4 d-flex align-items-center justify-content-center p-3">
+                <img src="{{ item.image }}" class="img-fluid rounded border" style="max-height: 220px;" alt="Listing image">
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h2 class="card-title mb-2">{{ item.title }}</h2>
+                    <p class="text-muted mb-2">{{ item.description }}</p>
+                    <h4 class="card-price mb-3">Price: ${{ price }}</h4>
+                    <ul class="list-unstyled mb-3">
+                        <li><strong>Owner:</strong> {{ item.owner }}</li>
+                        <li><strong>Category:</strong> {{ item.category }}</li>
+                        <li><strong>Status:</strong> 
+                            {% if item.isopen %}
+                                <span class="badge badge-success">Active</span>
+                            {% else %}
+                                <span class="badge badge-secondary">Closed</span>
+                            {% endif %}
+                        </li>
+                    </ul>
+
+                    {% if message %}
+                        <div class="alert alert-warning py-2 px-3 mb-3">{{ message }}</div>
+                    {% endif %}
+
+                    {% if user.is_authenticated %}
+                        <form action="{% url 'item' item.id %}" method="post" class="d-inline">
+                            {% csrf_token %}
+                            <input type="hidden" name="watchlist_action" value="{% if item in user.watchlist.all %}remove{% else %}add{% endif %}">
+                            <button type="submit" class="btn btn-outline-info btn-sm mb-2">
+                                {% if item in user.watchlist.all %}Remove from Watchlist{% else %}Add to Watchlist{% endif %}
+                            </button>
+                        </form>
+                    {% endif %}
+
+                    {% if user.is_authenticated and user == item.owner and item.isopen %}
+                        <form method="post" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" name="close_auction" value="true" class="btn btn-danger btn-sm mb-2">Close Auction</button>
+                        </form>
+                    {% endif %}
+
+                    {% if not item.isopen and winning_bidder and user == winning_bidder %}
+                        <div class="alert alert-success mt-2">You won this auction!</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if item.isopen %}
+        <div class="card mb-4">
+            <div class="card-body">
+                {% if user.is_authenticated %}
+                    <form action="{% url 'item' item.id %}" method="post" class="form-inline">
+                        {% csrf_token %}
+                        <input type="number" name="bid_place" class="form-control mr-2 mb-2" style="width: 180px;"
+                            {% if user == item.owner %} disabled placeholder="You can't bid as the owner"
+                            {% else %} placeholder="Your bid" {% endif %}>
+                        <button type="submit" class="btn btn-primary mb-2" {% if user == item.owner %} disabled {% endif %}>Place Bid</button>
+                    </form>
+                {% else %}
+                    <div class="alert alert-info mb-0">Log in to place a bid.</div>
+                {% endif %}
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">{{ item.bids.all|length }} bids so far</h5>
+            {% if bids %}
+                <ul class="list-group list-group-flush">
+                    {% for bid in bids %}
+                        <li class="list-group-item">{{ bid.bidder }}: ${{ bid.amount }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">No bids yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">Comments</h5>
+            {% if user.is_authenticated and item.isopen %}
+                <form action="{% url 'item' item.id %}" method="post" class="mb-3">
+                    {% csrf_token %}
+                    <textarea name="comment_text" class="form-control mb-2" rows="2" placeholder="Add a comment"></textarea>
+                    <button type="submit" class="btn btn-outline-primary btn-sm">Post Comment</button>
+                </form>
+            {% endif %}
+            {% if item.comments.all %}
+                <ul class="list-group list-group-flush">
+                    {% for comment in item.comments.all %}
+                        <li class="list-group-item"><strong>{{ comment.by }}</strong>: {{ comment.text }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">No comments yet.</p>
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+{% endblock %}

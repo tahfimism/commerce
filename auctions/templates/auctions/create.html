@@ -1,0 +1,34 @@
+{% extends "auctions/layout.html" %}
+
+{% block title %} Create listing {% endblock %}
+
+{% block body %}
+
+<h2>Create listing</h2>
+
+<form action="{% url 'create' %}" method="post">
+    <label>Listing name: </label>
+    <input required type="text" name="title" placeholder="Item name"> <br><br>
+
+    <label>Starting Bid:  </label>
+    <input required type="number" name="starting_bid" placeholder="starting bid"><br><br>
+
+    <label>Choose category </label>
+    <select name="category" >
+        <option value="" disabled selected>Categories</option>
+        {% for category in categories %}
+            <option value="{{ category.id }}" > {{ category.name }} </option>
+        {% endfor %}
+    </select><br><br>
+
+    <label>Image URL </label>
+    <input type="url" name="image_url" placeholder="put image url if u have"><br><br>
+
+    <label>Description:</label><br>
+    <textarea name="description" placeholder="item description" rows="2" cols="50"></textarea>
+<br><br>
+</form>
+
+
+
+{% endblock %}
